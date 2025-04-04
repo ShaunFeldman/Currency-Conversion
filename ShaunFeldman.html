@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Currency Converter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
+  <style>
+    /* Overall page styling + gradient background */
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #49c0aa, #9aa6dd);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Container for the converter with a clean card design*/
+    .container {
+      width: 90%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 40px;
+      margin: 20px;
+    }
+    /* Project title text */
+    .project-header {
+      text-align: center;
+      font-size: 1em;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    .converter h2 {
+      text-align: center;
+      margin: 0 0 25px;
+      font-size: 1.8em;
+      color: #333;
+    }
+    /* Grouping each field vertically */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 1em;
+      height: 1.2em; /* Reserve space for label */
+    }
+    .input-group input,
+    .input-group select,
+    .input-group button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: border 0.3s ease;
+      height: 50px;
+      box-sizing: border-box;
+    }
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group button:focus {
+      border-color: #2957b9;
+      outline: none;
+    }
+    /* Row for currency selectors and flip button */
+    .currency-row {
+      display: flex;
+      gap: 10px;
+    }
+    .currency-row .input-group {
+      flex: 1;
+    }
+    /* Swap button container: fixed width and centered content */
+    .currency-row .swap-group {
+      flex: 0 0 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: calc(1.2em + 8px);
+    }
+    /* Flip button styling */
+    #flip-button {
+      background-color: #2980b9;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 80px;
+      height: 50px;
+    }
+    #flip-button:hover {
+      background-color: #1d72ab;
+    }
+    /* Decimals row styling */
+    .decimals-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .decimals-row span {
+      font-size: 1em;
+      color: #333;
+    }
+    .decimal-btn {
+      flex: 0 0 50px;
+      padding: 8px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      height: 40px;
+    }
+    .decimal-btn.active,
+    .decimal-btn:hover {
+      background-color: #2980b9;
+      color: #fff;
+      border-color: #2980b9;
+    }
+    .result {
+      text-align: center;
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #2980b9;
+      margin-top: 10px;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 500px) {
+      .container {
+        padding: 20px;
+      }
+      .currency-row {
+        flex-direction: column;
+      }
+      .currency-row .swap-group {
+        margin-top: 0;
+        flex: 0 0 auto;
+      }
+      #flip-button {
+        width: 100%;
+      }
+      .decimals-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .decimal-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="project-header">
+      Shaun Feldman
+    </div>
+    <div class="converter">
+      <h2>Currency Converter</h2>
+      <div class="field-group">
+        <!-- Row for currency selectors and swap button -->
+        <div class="currency-row">
+          <div class="input-group">
+            <label for="from-currency">From</label>
+            <select id="from-currency"></select>
+          </div>
+          <div class="input-group swap-group">
+            <button id="flip-button" type="button">Swap</button>
+          </div>
+          <div class="input-group">
+            <label for="to-currency">To</label>
+            <select id="to-currency"></select>
+          </div>
+        </div>
+        <!-- Input for the amount with dynamic currency recognition -->
+        <div class="input-group">
+          <label for="amount">Amount (<span id="fromCurrencyLabel">USD</span>)</label>
+          <input type="number" id="amount" placeholder="Enter amount in USD" />
+        </div>
+        <!-- Decimals selection row -->
+        <div class="decimals-row">
+          <span>Decimals:</span>
+          <button class="decimal-btn" data-decimals="0">0</button>
+          <button class="decimal-btn" data-decimals="1">1</button>
+          <button class="decimal-btn" data-decimals="2">2</button>
+          <button class="decimal-btn" data-decimals="3">3</button>
+          <button class="decimal-btn" data-decimals="4">4</button>
+          <button class="decimal-btn" data-decimals="ALL">ALL</button>
+        </div>
+      </div>
+      <div id="result" class="result">Enter an amount to convert.</div>
+    </div>
+  </div>
+  <!-- jQuery library (CDN) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(function() {
+      const API_URL = 'https://api.frankfurter.app';
+      // Set default decimals to 2
+      let currentDecimals = "2";
+      
+      // Populate currency dropdowns using the API
+      $.getJSON(API_URL + '/currencies', function(data) {
+        $.each(data, function(code, name) {
+          const optionText = code + ' - ' + name;
+          $('#from-currency').append(`<option value="${code}">${optionText}</option>`);
+          $('#to-currency').append(`<option value="${code}">${optionText}</option>`);
+        });
+        // Set default selections
+        $('#from-currency').val('USD');
+        $('#to-currency').val('EUR');
+        updateFromCurrencyLabel();
+      });
+      
+      // Event handlers to trigger conversion instantly
+      $('#amount, #to-currency').on('input change', function() {
+        convertCurrency();
+      });
+      
+      $('#from-currency').on('change', function() {
+        updateFromCurrencyLabel();
+        convertCurrency();
+      });
+      
+      // Flip button event: swap currencies instantly
+      $('#flip-button').on('click', function() {
+        const fromVal = $('#from-currency').val();
+        const toVal = $('#to-currency').val();
+        $('#from-currency').val(toVal);
+        $('#to-currency').val(fromVal);
+        updateFromCurrencyLabel();
+        convertCurrency();
+      });
+      
+      // Decimal buttons event: update currentDecimals and active style
+      $('.decimal-btn').on('click', function() {
+        currentDecimals = $(this).data('decimals').toString();
+        $('.decimal-btn').removeClass('active');
+        $(this).addClass('active');
+        convertCurrency();
+      });
+      
+      // Update the "from" currency label and input placeholder
+      function updateFromCurrencyLabel() {
+        const fromCurrency = $('#from-currency').val();
+        $('#fromCurrencyLabel').text(fromCurrency);
+        $('#amount').attr('placeholder', `Enter amount in ${fromCurrency}`);
+      }
+      
+      // Conversion function: fetches rate and displays result instantly
+      // The input amount is shown as entered, while the converted output is formatted.
+      function convertCurrency() {
+        const rawInput = $('#amount').val().trim(); // Use raw input value for display
+        const from = $('#from-currency').val();
+        const to = $('#to-currency').val();
+        
+        if (rawInput === '') {
+          $('#result').text('Enter an amount to convert.');
+          return;
+        }
+        
+        const amount = parseFloat(rawInput);
+        if (isNaN(amount)) {
+          $('#result').text('Please enter a valid number.');
+          return;
+        }
+        
+        // If currencies are the same, just echo the input value for both
+        if (from === to) {
+          $('#result').text(`${rawInput} ${from} = ${rawInput} ${to}`);
+          return;
+        }
+        
+        // Fetch the conversion rate from the API and calculate the result
+        $.getJSON(`${API_URL}/latest?base=${from}&symbols=${to}`, function(data) {
+          if (data && data.rates && data.rates[to]) {
+            const rate = data.rates[to];
+            const convertedValue = amount * rate;
+            // Only the converted value is formatted according to the selected decimal option.
+            const formattedConverted = (currentDecimals === "ALL") 
+              ? convertedValue.toString() 
+              : convertedValue.toFixed(currentDecimals);
+            $('#result').text(`${rawInput} ${from} = ${formattedConverted} ${to}`);
+          } else {
+            $('#result').text('Conversion rate not available.');
+          }
+        }).fail(function() {
+          $('#result').text('Error fetching conversion rate.');
+        });
+      }
+    });
+  </script>
+</body>
+</html>
