@@ -205,13 +205,12 @@
   </div>
   <!-- jQuery library (CDN) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="convertCurrency.js"></script>
   <script>
     $(function() {
       const API_URL = 'https://api.frankfurter.app';
       // Set default decimals to 2
       let currentDecimals = "2";
-      // Highlight default decimals button on load
-      $('.decimal-btn[data-decimals="2"]').addClass('active');
       
       // Populate currency dropdowns using the API
       $.getJSON(API_URL + '/currencies', function(data) {
@@ -248,7 +247,7 @@
       
       // Decimal buttons event: update currentDecimals and active style
       $('.decimal-btn').on('click', function() {
-        currentDecimals = $(this).data('decimals').toString();
+        setCurrentDecimals($(this).data('decimals').toString());
         $('.decimal-btn').removeClass('active');
         $(this).addClass('active');
         convertCurrency();
@@ -261,47 +260,6 @@
         $('#amount').attr('placeholder', `Enter amount in ${fromCurrency}`);
       }
       
-      // Conversion function: fetches rate and displays result instantly
-      // The input amount is shown as entered, while the converted output is formatted.
-      function convertCurrency() {
-        const rawInput = $('#amount').val().trim(); // Use raw input value for display
-        const from = $('#from-currency').val();
-        const to = $('#to-currency').val();
-        
-        if (rawInput === '') {
-          $('#result').text('Enter an amount to convert.');
-          return;
-        }
-        
-        const amount = parseFloat(rawInput);
-        if (isNaN(amount)) {
-          $('#result').text('Please enter a valid number.');
-          return;
-        }
-        
-        // If currencies are the same, just echo the input value for both
-        if (from === to) {
-          $('#result').text(`${rawInput} ${from} = ${rawInput} ${to}`);
-          return;
-        }
-        
-        // Fetch the conversion rate from the API and calculate the result
-        $.getJSON(`${API_URL}/latest?base=${from}&symbols=${to}`, function(data) {
-          if (data && data.rates && data.rates[to]) {
-            const rate = data.rates[to];
-            const convertedValue = amount * rate;
-            // Only the converted value is formatted according to the selected decimal option.
-            const formattedConverted = (currentDecimals === "ALL") 
-              ? convertedValue.toString() 
-              : convertedValue.toFixed(currentDecimals);
-            $('#result').text(`${rawInput} ${from} = ${formattedConverted} ${to}`);
-          } else {
-            $('#result').text('Conversion rate not available.');
-          }
-        }).fail(function() {
-          $('#result').text('Error fetching conversion rate.');
-        });
-      }
     });
   </script>
 </body>
