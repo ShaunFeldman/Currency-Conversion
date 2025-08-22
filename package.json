@@ -1,0 +1,12 @@
+{
+  "name": "currency-conversion",
+  "version": "1.0.0",
+  "description": "Currency converter project",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jquery": "^3.6.0"
+  }
+}
