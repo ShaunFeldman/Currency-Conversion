@@ -210,6 +210,9 @@
       const API_URL = 'https://api.frankfurter.app';
       // Set default decimals to 2
       let currentDecimals = "2";
+      // Track outstanding API requests
+      let activeRequest = null;
+      let requestCounter = 0;
       
       // Populate currency dropdowns using the API
       $.getJSON(API_URL + '/currencies', function(data) {
@@ -262,6 +265,12 @@
       // Conversion function: fetches rate and displays result instantly
       // The input amount is shown as entered, while the converted output is formatted.
       function convertCurrency() {
+        // Increment request counter and abort any previous request
+        const thisRequest = ++requestCounter;
+        if (activeRequest) {
+          activeRequest.abort();
+        }
+
         const rawInput = $('#amount').val().trim(); // Use raw input value for display
         const from = $('#from-currency').val();
         const to = $('#to-currency').val();
@@ -284,20 +293,23 @@
         }
         
         // Fetch the conversion rate from the API and calculate the result
-        $.getJSON(`${API_URL}/latest?base=${from}&symbols=${to}`, function(data) {
+        activeRequest = $.getJSON(`${API_URL}/latest?base=${from}&symbols=${to}`, function(data) {
+          if (thisRequest !== requestCounter) return; // Ignore outdated responses
           if (data && data.rates && data.rates[to]) {
             const rate = data.rates[to];
             const convertedValue = amount * rate;
             // Only the converted value is formatted according to the selected decimal option.
-            const formattedConverted = (currentDecimals === "ALL") 
-              ? convertedValue.toString() 
+            const formattedConverted = (currentDecimals === "ALL")
+              ? convertedValue.toString()
               : convertedValue.toFixed(currentDecimals);
             $('#result').text(`${rawInput} ${from} = ${formattedConverted} ${to}`);
           } else {
             $('#result').text('Conversion rate not available.');
           }
-        }).fail(function() {
-          $('#result').text('Error fetching conversion rate.');
+        }).fail(function(jqXHR, textStatus) {
+          if (textStatus !== 'abort' && thisRequest === requestCounter) {
+            $('#result').text('Error fetching conversion rate.');
+          }
         });
       }
     });
