@@ -209,6 +209,8 @@
   <script>
     $(function() {
       const API_URL = 'https://api.frankfurter.app';
+      // Set default decimals to 2
+      let currentDecimals = "2";
       
       // Populate currency dropdowns using the API
       $.getJSON(API_URL + '/currencies', function(data) {
